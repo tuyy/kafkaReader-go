@@ -1,75 +1,116 @@
 package main
 
 import (
-	"flag"
+	"context"
+	"fmt"
+	"github.com/tuyy/kafkaReader-go/src/cmd"
+	"github.com/tuyy/kafkaReader-go/src/kafka"
 	"log"
-	"math"
+	"os"
 	"strings"
 	"time"
 )
 
-const timeLayout = "200601021504"
-
-type CmdArgs struct {
-	BrokerServers []string
-	Topic         string
-	Output        string
-	StartTime     time.Time
-	EndTime       time.Time
-	StartOffset   int
-	EndOffset     int
-	Limit         int
-	FilterText    string
-	MaxTimeout    int
-}
-
-var cmdArgs CmdArgs
-
-func loadArgs() {
-	flag.StringVar(&cmdArgs.Topic, "topic", "", "kafka topic")
-	flag.StringVar(&cmdArgs.Output, "output", "result.log", "output file path")
-	flag.StringVar(&cmdArgs.FilterText, "grep", "", "included text in msg")
-	flag.IntVar(&cmdArgs.Limit, "limit", math.MaxInt32, "max filtered msg limit")
-	flag.IntVar(&cmdArgs.MaxTimeout, "maxtimeout", math.MaxInt32, "max timeout")
-	flag.IntVar(&cmdArgs.StartOffset, "startoffset", 0, "start offset")
-	flag.IntVar(&cmdArgs.EndOffset, "endoffset", math.MaxInt32, "end offset")
-	brokerServerPtr := flag.String("b", "", "broker servers")
-	startDatePtr := flag.String("start", "199102010308", "start datetime str ex)199102010308")
-	endDatePtr := flag.String("end", "299102010308", "end datetime str ex)299102010308")
-
-	flag.Parse()
-
-	if *brokerServerPtr == "" {
-		log.Fatalln("empty broker server.")
-	}
-	for _, brokerServer := range strings.Split(*brokerServerPtr, ",") {
-		cmdArgs.BrokerServers = append(cmdArgs.BrokerServers, brokerServer)
-	}
-	if len(cmdArgs.BrokerServers) == 0 {
-		log.Fatalln("empty broker server.")
-	}
-
-	if cmdArgs.Topic == "" {
-		log.Fatalln("empty input topic.")
-	}
-
-	var err error
-	cmdArgs.StartTime, err = time.Parse(timeLayout, *startDatePtr)
-	if err != nil {
-		log.Fatalf("invalid start time. err:%s ex)202102031421\n", err)
-	}
-
-	cmdArgs.EndTime, err = time.Parse(timeLayout, *endDatePtr)
-	if err != nil {
-		log.Fatalf("invalid end time. err:%s ex)202102031421\n", err)
-	}
-
-	if cmdArgs.StartTime.After(cmdArgs.EndTime) {
-		log.Fatalln("invalid start and end time.")
-	}
-}
+const summaryTimeLayout = "[2006/01/02 15:04:05.999]"
 
 func main() {
-	loadArgs()
+	start := time.Now()
 
+	// TODO 1) kafka username,password 추가
+	//      2) 설정파일로 옵션 넣기
+	//      3) headers 검증
+	//      4) Makefile bin 생성 스크립트 추가
+	cmd.LoadAndValidateArgs()
+
+	f, err := os.OpenFile(cmd.Args.Output, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("failed to open result file. output:%s err:%s\n", cmd.Args.Output, err)
+	}
+
+	c := kafka.NewKafkaConsumer(cmd.Args.BrokerServers, cmd.Args.Topic)
+	msgChan := make(chan kafka.Msg)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	c.ReadMessages(ctx, msgChan, cmd.Args.PollTimeout)
+
+	fmt.Println("Waiting......")
+
+	total, count := 0, 0
+	for msg := range msgChan {
+		total++
+
+		if isFiltered(&msg) {
+			WriteFilteredMsg(&msg, f)
+
+			count++
+			if count == cmd.Args.Limit {
+				cancel()
+				break
+			}
+		}
+	}
+
+	PrintSummary(total, count, start)
+}
+
+func WriteFilteredMsg(msg *kafka.Msg, f *os.File) {
+	val := strings.TrimSpace(string(msg.Value))
+	if cmd.Args.IsOnlyMsg {
+		fmt.Fprintln(f, val)
+	} else {
+		fmt.Fprintf(f, "time:%s topic:%s partition:%d offset:%d key:%s headers:%v msg:%s\n",
+			msg.Time.Format(summaryTimeLayout),
+			msg.Topic,
+			msg.Partition,
+			msg.Offset,
+			msg.Key,
+			msg.Headers,
+			val)
+	}
+}
+
+func isFiltered(msg *kafka.Msg) bool {
+	if msg.Time.Before(cmd.Args.StartTime) || msg.Time.After(cmd.Args.EndTime){
+		return false
+	}
+	if cmd.Args.StartOffset > msg.Offset || cmd.Args.EndOffset < msg.Offset {
+		return false
+	}
+	if cmd.Args.Key != "" && cmd.Args.Key != string(msg.Key) {
+		return false
+	}
+	if cmd.Args.Partition != -1 && cmd.Args.Partition != msg.Partition {
+		return false
+	}
+	if cmd.Args.FilterText != "" && !strings.Contains(string(msg.Value), cmd.Args.FilterText) {
+		return false
+	}
+
+	if len(cmd.Args.Headers) > 0 {
+		for key, val := range cmd.Args.Headers {
+			isOk := false
+			for _, header := range msg.Headers {
+				if header.Key == key && string(header.Value) == val {
+					isOk = true
+					break
+				}
+			}
+			if !isOk {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func PrintSummary(total int, count int, start time.Time) {
+	fmt.Println("========== summary ==========")
+	fmt.Println(":: Total:", total)
+	fmt.Println(":: Filtered:", count)
+	fmt.Println(":: Filtered Text:", cmd.Args.FilterText)
+	fmt.Println(":: Target Topic:", cmd.Args.Topic)
+	fmt.Println(":: Output:", cmd.Args.Output)
+	fmt.Printf(":: Elapsed:%.3f sec\n", time.Since(start).Seconds())
+	fmt.Println("=============================")
 }
