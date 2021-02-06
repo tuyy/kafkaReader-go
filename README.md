@@ -4,8 +4,11 @@
 ### kafkaReader-go
  kafka에 저장되어 있는 특정 토픽의 로그를 아래 조건에 맞게 읽은 후 파일에 저장한다.
 * startTime ~ endTime
+* startOffset ~ endOffset
 * limit logCount
-* 특정 문자열 포함되어 있는 로그
+* filter text
+* kafka key
+* kafka headers
 
 #### 로그 형식 예시
 ```
@@ -18,9 +21,16 @@
 ```
 $ ./kafkaReader -b=${broker_servers} \
                 -topic=${topic} \
+                -partiton=${partiton, default:all} \
                 -output=${output_file_path, default) result.log} \
                 -start=${start_date_time_str, ex) 202102031421} \
                 -end=${end_date_time_str, ex) 202102031423} \
+                -startoffset=${start_offset} \
+                -endoffset=${end_offset} \
                 -limit=${log_limit_count} \
-                -grep=${included_text}
+                -grep=${included_text} \
+                -polltimeout=${poll_timeout_sec} \
+                -key=${kafka_key} \
+                -headers=${kafka_header_json}
+                -onlymsg=${true_or_false}
 ```
