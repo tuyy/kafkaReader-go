@@ -17,14 +17,15 @@ type KafkaReaderArgs struct {
 	Partition     int
 	Key           string            // kafka key
 	Headers       map[string]string // kafka headers
-	StartOffset   int
-	EndOffset     int
+	StartOffset   int64
+	EndOffset     int64
 	Limit         int
-	MaxTimeout    int
+	PollTimeout   int
 	StartTime     time.Time
 	EndTime       time.Time
 	FilterText    string
 	Output        string
+	IsOnlyMsg     bool
 }
 
 var Args KafkaReaderArgs
@@ -34,13 +35,14 @@ func LoadAndValidateArgs() {
 	flag.StringVar(&Args.Output, "output", "result.log", "output file path")
 	flag.StringVar(&Args.FilterText, "grep", "", "included text in msg")
 	flag.StringVar(&Args.Key, "key", "", "kafka key. default:ignore")
+	flag.BoolVar(&Args.IsOnlyMsg, "onlymsg", false, "include only msg")
 	flag.IntVar(&Args.Partition, "partition", -1, "partition")
 	flag.IntVar(&Args.Limit, "limit", math.MaxInt32, "max filtered msg limit")
-	flag.IntVar(&Args.MaxTimeout, "maxtimeout", math.MaxInt32, "max timeout")
-	flag.IntVar(&Args.StartOffset, "startoffset", 0, "start offset")
-	flag.IntVar(&Args.EndOffset, "endoffset", math.MaxInt32, "end offset")
+	flag.IntVar(&Args.PollTimeout, "polltimeout", 60, "kafka msg poll timeout")
+	flag.Int64Var(&Args.StartOffset, "startoffset", 0, "start offset")
+	flag.Int64Var(&Args.EndOffset, "endoffset", math.MaxInt32, "end offset")
 	brokerServerPtr := flag.String("b", "", "broker servers")
-	headerPtr := flag.String("header", "", "kafka header. default:ignore")
+	headerPtr := flag.String("headers", "{}", "kafka headers with json string")
 	startDatePtr := flag.String("start", "199102010308", "start datetime str ex)199102010308")
 	endDatePtr := flag.String("end", "299102010308", "end datetime str ex)299102010308")
 	flag.Parse()
@@ -86,13 +88,9 @@ func validateKafkaTopic() {
 }
 
 func validateKafkaHeaders(headerPtr string) {
-	if headerPtr == "" {
-		Args.Headers = make(map[string]string)
-	} else {
-		err := json.Unmarshal([]byte(headerPtr), Args.Headers)
-		if err != nil {
-			log.Fatalf("invalid kafka header. err:%s\n", err)
-		}
+	err := json.Unmarshal([]byte(headerPtr), Args.Headers)
+	if err != nil {
+		log.Fatalf("invalid kafka header. err:%s\n", err)
 	}
 }
 
@@ -107,4 +105,3 @@ func validateKafkaBrokerServers(brokerServerPtr string) {
 		log.Fatalln("empty broker server.")
 	}
 }
-
