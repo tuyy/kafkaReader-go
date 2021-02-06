@@ -32,7 +32,7 @@ func NewMsg(m kafka.Message) Msg {
 	}
 }
 
-func (c *Consumer) ReadMessage(ctx context.Context, msgChan chan Msg, pollTimeout int) {
+func (c *Consumer) ReadMessages(ctx context.Context, msgChan chan Msg, pollTimeout int) {
 	go func() {
 		defer c.reader.Close()
 

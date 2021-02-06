@@ -14,7 +14,7 @@ func TestKafkaConsumerHappy(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 
 	// ReadMsg
-	consumer.ReadMessage(ctx, msgChan, 100)
+	consumer.ReadMessages(ctx, msgChan, 100)
 
 	var result []Msg
 
