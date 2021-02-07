@@ -3,9 +3,11 @@ package cmd
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math"
+	"os"
 	"reflect"
 	"strings"
 	"time"
@@ -55,6 +57,29 @@ func LoadAndValidateArgs() {
 	flag.Parse()
 
 	validateArgs(*brokerServerPtr, *headerPtr, *startDatePtr, *endDatePtr, *configFilePtr)
+
+	writeInputArgsInHistoryDir()
+}
+
+const historyDir = "history"
+const inputConfFileFormat = "input_*_%s.json"
+
+func writeInputArgsInHistoryDir() {
+	b, err := json.MarshalIndent(Args, "", "    ")
+	if err != nil {
+		log.Fatalf("failed to write input args in history dir. err:%s\n", err)
+	}
+
+	_ = os.Mkdir(historyDir, os.ModePerm)
+
+	tmpFilePattern := fmt.Sprintf(inputConfFileFormat, time.Now().Format("2006-01-02_150405"))
+	f, err := ioutil.TempFile(historyDir, tmpFilePattern)
+	if err != nil {
+		log.Fatalf("failed to create tempfile. err:%s\n", err)
+	}
+	defer f.Close()
+
+	fmt.Fprintln(f, string(b))
 }
 
 func validateArgs(brokerServers, header, startDate, endDate, configFile string) {

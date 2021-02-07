@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/tuyy/kafkaReader-go/src/cmd"
-	"github.com/tuyy/kafkaReader-go/src/kafka"
+	"github.com/tuyy/kafkaReader-go/pkg/cmd"
+	"github.com/tuyy/kafkaReader-go/pkg/kafka"
 	"log"
 	"os"
 	"strings"
