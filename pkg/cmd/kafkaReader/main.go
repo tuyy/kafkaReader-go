@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"github.com/tuyy/kafkaReader-go/pkg/cmd"
 	"github.com/tuyy/kafkaReader-go/pkg/kafka"
@@ -80,20 +81,16 @@ func runReadingKafkaMsg(ctx context.Context, msgChan chan kafka.Msg) {
 	c.ReadMessages(ctx, msgChan, cmd.Args.PollTimeout)
 }
 
-var decryptKey []byte
-
 func WriteFilteredMsg(msg *kafka.Msg) {
 	var payload string
 
 	if cmd.Args.IsDecrypted {
-		if len(decryptKey) == 0 {
-			decryptKey = cmd.MakeMd5Key(cmd.Args.DecryptKey)
-		}
-		decrypted, err := cmd.DecryptAes128Ecb(decryptKey, msg.Value)
+		decrypted, err := decryptPayload(string(msg.Value))
 		if err != nil {
-			log.Printf("failed to decrypt payload. err:%s payload:%s\n", err, string(msg.Value))
+			fmt.Printf("failed to decrypt payload. err:%s payload:%s\n", err, payload)
 			return
 		}
+
 		payload = strings.TrimSpace(decrypted)
 	} else {
 		payload = strings.TrimSpace(string(msg.Value))
@@ -111,6 +108,26 @@ func WriteFilteredMsg(msg *kafka.Msg) {
 			msg.Headers,
 			payload)
 	}
+}
+
+var decryptKey []byte
+
+func decryptPayload(payload string) (string, error) {
+	if len(decryptKey) == 0 {
+		decryptKey = cmd.MakeMd5Key(cmd.Args.DecryptKey)
+	}
+
+	b, err := base64.StdEncoding.DecodeString(payload)
+	if err != nil {
+		return "", err
+	}
+
+	decrypted, err := cmd.DecryptAes128Ecb(decryptKey, b)
+	if err != nil {
+		return "", err
+	}
+
+	return decrypted, nil
 }
 
 func isFiltered(msg *kafka.Msg) bool {
