@@ -18,6 +18,12 @@
 ```
 
 #### usage
+* config 파일의 우선순위가 커멘드 라인으로 입력한 값보다 높다. (overwrite)
+* 옵션 기본 값은 아래 링크를 참조한다.
+    * [default option value](https://github.com/tuyy/kafkaReader-go/blob/master/pkg/cmd/args.go#L40-L56)
+ 
+ 
+
 ```
 $ ./kafkaReader -b=${broker_servers} \
                 -topic=${topic} \
