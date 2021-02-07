@@ -19,6 +19,8 @@
 
 #### usage
 * config 파일의 우선순위가 커멘드 라인으로 입력한 값보다 높다. (overwrite)
+* broker_server, topic 옵션은 필수고 나머지는 기본 값을 사용할 수 있다.
+* 종료 조건은, filtered_msg_limit_count, poll_timeout_sec 이다.
 * 옵션 기본 값은 아래 링크를 참조한다.
     * [default option value](https://github.com/tuyy/kafkaReader-go/blob/master/pkg/cmd/args.go#L40-L56)
  
@@ -33,7 +35,7 @@ $ ./kafkaReader -b=${broker_servers} \
                 -end=${end_date_time_str, ex) 202102031423} \
                 -startoffset=${start_offset} \
                 -endoffset=${end_offset} \
-                -limit=${log_limit_count} \
+                -limit=${filtered_msg_limit_count} \
                 -grep=${included_text} \
                 -polltimeout=${poll_timeout_sec} \
                 -key=${kafka_key} \
@@ -41,6 +43,5 @@ $ ./kafkaReader -b=${broker_servers} \
                 -onlymsg=${true_or_false} \
                 -decrypted=${payload_decrypt, aes128} \
                 -decryptkey=${payload_decrypt_key, default:nvmail} \
-                -config=${conf_file_path} \
                 -config=${conf_file_path} \
 ```
