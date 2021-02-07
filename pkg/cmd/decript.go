@@ -26,7 +26,13 @@ func decryptAes128Ecb(key, target []byte) (string, error) {
 		target = target[aes.BlockSize:]
 	}
 
-	return string(result), nil
+	return string(unpad(result)), nil
+}
+
+func unpad(src []byte) []byte {
+	length := len(src)
+	unpadding := int(src[length-1])
+	return src[:(length - unpadding)]
 }
 
 func makeMd5Key(key string) []byte {
