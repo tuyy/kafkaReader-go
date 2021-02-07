@@ -1,0 +1,20 @@
+{
+  "BrokerServers": [
+    "dev-tuyy0-cassandra001-ncl.nfra.io:9092"
+  ],
+  "Topic": "mytest1",
+  "Partition": -1,
+  "Key": "",
+  "Headers": {},
+  "UserName": "",
+  "Password": "",
+  "StartOffset": 0,
+  "EndOffset": 2147483647,
+  "Limit": 2147483647,
+  "PollTimeout": 10,
+  "StartTime": "1991-02-01T00:00:00Z",
+  "EndTime": "2041-02-01T00:00:00Z",
+  "FilterText": "",
+  "Output": "result.log",
+  "IsOnlyMsg": true
+}
