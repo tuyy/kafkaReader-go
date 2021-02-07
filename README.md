@@ -39,5 +39,8 @@ $ ./kafkaReader -b=${broker_servers} \
                 -key=${kafka_key} \
                 -headers=${kafka_header_json} \
                 -onlymsg=${true_or_false} \
-                -config=${conf_file_path}
+                -decrypted=${payload_decrypt, aes128} \
+                -decryptkey=${payload_decrypt_key, default:nvmail} \
+                -config=${conf_file_path} \
+                -config=${conf_file_path} \
 ```

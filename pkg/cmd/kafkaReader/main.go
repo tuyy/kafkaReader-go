@@ -30,7 +30,7 @@ func readKafkaAndFilterMsg() (int, int) {
 
 	msgChan := make(chan kafka.Msg)
 	ctx, cancel := context.WithCancel(context.Background())
-	beginReadingKafka(ctx, msgChan)
+	runReadingKafkaMsg(ctx, msgChan)
 
 	// print "Waiting..."
 	tick := startWaitingTick()
@@ -74,16 +74,33 @@ func startWaitingTick() *time.Ticker {
 	return tick
 }
 
-func beginReadingKafka(ctx context.Context, msgChan chan kafka.Msg) {
+func runReadingKafkaMsg(ctx context.Context, msgChan chan kafka.Msg) {
 	c := kafka.NewKafkaConsumer(cmd.Args.BrokerServers, cmd.Args.Topic, cmd.Args.UserName, cmd.Args.Password)
 
 	c.ReadMessages(ctx, msgChan, cmd.Args.PollTimeout)
 }
 
+var decryptKey []byte
+
 func WriteFilteredMsg(msg *kafka.Msg) {
-	val := strings.TrimSpace(string(msg.Value))
+	var payload string
+
+	if cmd.Args.IsDecrypted {
+		if len(decryptKey) == 0 {
+			decryptKey = cmd.MakeMd5Key(cmd.Args.DecryptKey)
+		}
+		decrypted, err := cmd.DecryptAes128Ecb(decryptKey, msg.Value)
+		if err != nil {
+			log.Printf("failed to decrypt payload. err:%s payload:%s\n", err, string(msg.Value))
+			return
+		}
+		payload = strings.TrimSpace(decrypted)
+	} else {
+		payload = strings.TrimSpace(string(msg.Value))
+	}
+
 	if cmd.Args.IsOnlyMsg {
-		fmt.Fprintln(output, val)
+		fmt.Fprintln(output, payload)
 	} else {
 		fmt.Fprintf(output, "time:%s topic:%s partition:%d offset:%d key:%s headers:%v msg:%s\n",
 			msg.Time.Format(basicTimeLayout),
@@ -92,7 +109,7 @@ func WriteFilteredMsg(msg *kafka.Msg) {
 			msg.Offset,
 			msg.Key,
 			msg.Headers,
-			val)
+			payload)
 	}
 }
 
@@ -149,6 +166,10 @@ func printBeginBanner() {
 	fmt.Printf(":: Kafka Header: %v\n", cmd.Args.Headers)
 	fmt.Printf(":: Filtered Limit: %d\n", cmd.Args.Limit)
 	fmt.Printf(":: Kafka Poll Timeout: %d sec\n", cmd.Args.PollTimeout)
+	fmt.Printf(":: Payload Decrypted: %v\n", cmd.Args.IsDecrypted)
+	if cmd.Args.IsDecrypted {
+		fmt.Printf(":: Payload Decrypt Key: %s\n", cmd.Args.DecryptKey)
+	}
 	fmt.Printf(":: Is Only msg: %v\n", cmd.Args.IsOnlyMsg)
 	fmt.Print("=================================================\n\n")
 }
