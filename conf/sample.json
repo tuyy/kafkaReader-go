@@ -17,6 +17,6 @@
   "FilterText": "",
   "Output": "result.log",
   "IsOnlyMsg": true,
-  "IsDecrypted": true,
-  "DecryptKey": "nvmail"
+  "IsDecrypted": false,
+  "DecryptKey": ""
 }

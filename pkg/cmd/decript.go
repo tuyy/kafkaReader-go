@@ -3,10 +3,11 @@ package cmd
 import (
 	"crypto/aes"
 	"crypto/md5"
+	"encoding/base64"
 	"errors"
 )
 
-func DecryptAes128Ecb(key, target []byte) (string, error) {
+func decryptAes128Ecb(key, target []byte) (string, error) {
 	cipher, err := aes.NewCipher(key)
 	if err != nil {
 		return "", err
@@ -28,8 +29,29 @@ func DecryptAes128Ecb(key, target []byte) (string, error) {
 	return string(result), nil
 }
 
-func MakeMd5Key(key string) []byte {
+func makeMd5Key(key string) []byte {
 	m := md5.New()
 	m.Write([]byte(key))
 	return m.Sum(nil)
 }
+
+var decryptKey []byte
+
+func DecryptPayload(payload string) (string, error) {
+	if len(decryptKey) == 0 {
+	    decryptKey = makeMd5Key(Args.DecryptKey)
+	}
+
+	b, err := base64.StdEncoding.DecodeString(payload)
+	if err != nil {
+		return "", err
+	}
+
+	decrypted, err := decryptAes128Ecb(decryptKey, b)
+	if err != nil {
+		return "", err
+	}
+
+	return decrypted, nil
+}
+

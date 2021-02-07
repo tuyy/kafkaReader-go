@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"github.com/tuyy/kafkaReader-go/pkg/cmd"
 	"github.com/tuyy/kafkaReader-go/pkg/kafka"
@@ -85,7 +84,7 @@ func WriteFilteredMsg(msg *kafka.Msg) {
 	var payload string
 
 	if cmd.Args.IsDecrypted {
-		decrypted, err := decryptPayload(string(msg.Value))
+		decrypted, err := cmd.DecryptPayload(string(msg.Value))
 		if err != nil {
 			fmt.Printf("failed to decrypt payload. err:%s payload:%s\n", err, payload)
 			return
@@ -108,26 +107,6 @@ func WriteFilteredMsg(msg *kafka.Msg) {
 			msg.Headers,
 			payload)
 	}
-}
-
-var decryptKey []byte
-
-func decryptPayload(payload string) (string, error) {
-	if len(decryptKey) == 0 {
-		decryptKey = cmd.MakeMd5Key(cmd.Args.DecryptKey)
-	}
-
-	b, err := base64.StdEncoding.DecodeString(payload)
-	if err != nil {
-		return "", err
-	}
-
-	decrypted, err := cmd.DecryptAes128Ecb(decryptKey, b)
-	if err != nil {
-		return "", err
-	}
-
-	return decrypted, nil
 }
 
 func isFiltered(msg *kafka.Msg) bool {
@@ -192,7 +171,7 @@ func printBeginBanner() {
 }
 
 func printSummaryBanner(total int, count int, elapsed time.Duration) {
-	fmt.Println("\n==================== SUMMARY ====================")
+	fmt.Println("\n\n==================== SUMMARY ====================")
 	fmt.Println(":: Total:", total)
 	fmt.Println(":: Filtered:", count)
 	fmt.Println(":: Topic:", cmd.Args.Topic)

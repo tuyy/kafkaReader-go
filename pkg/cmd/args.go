@@ -109,28 +109,28 @@ func loadConfigFile(configFileStr string) {
 	if len(newConf.BrokerServers) > 0 {
 		Args.BrokerServers = newConf.BrokerServers
 	}
-	if newConf.Topic != Args.Topic {
+	if newConf.Topic != "" && newConf.Topic != Args.Topic {
 		Args.Topic = newConf.Topic
 	}
-	if newConf.UserName != Args.UserName {
+	if newConf.UserName != "" && newConf.UserName != Args.UserName {
 		Args.UserName = newConf.UserName
 	}
-	if newConf.Password != Args.Password {
+	if newConf.Password != "" && newConf.Password != Args.Password {
 		Args.Password = newConf.Password
 	}
 	if newConf.PollTimeout != Args.PollTimeout {
 		Args.PollTimeout = newConf.PollTimeout
 	}
-	if newConf.FilterText != Args.FilterText {
+	if newConf.FilterText != "" && newConf.FilterText != Args.FilterText {
 		Args.FilterText = newConf.FilterText
 	}
-	if newConf.Output != Args.Output {
+	if newConf.Output != "" && newConf.Output != Args.Output {
 		Args.Output = newConf.Output
 	}
 	if newConf.IsOnlyMsg != Args.IsOnlyMsg {
 		Args.IsOnlyMsg = newConf.IsOnlyMsg
 	}
-	if newConf.Key != Args.Key {
+	if newConf.Key != "" && newConf.Key != Args.Key {
 		Args.Key = newConf.Key
 	}
 	if !reflect.DeepEqual(newConf.Headers, Args.Headers) {
@@ -148,7 +148,7 @@ func loadConfigFile(configFileStr string) {
 	if newConf.IsDecrypted != Args.IsDecrypted {
 		Args.IsDecrypted = newConf.IsDecrypted
 	}
-	if newConf.DecryptKey != Args.DecryptKey {
+	if newConf.DecryptKey != "" && newConf.DecryptKey != Args.DecryptKey {
 		Args.DecryptKey = newConf.DecryptKey
 	}
 }
