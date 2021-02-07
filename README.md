@@ -3,6 +3,7 @@
 
 ### kafkaReader-go
  kafka에 저장되어 있는 특정 토픽의 로그를 아래 조건에 맞게 읽은 후 파일에 저장한다.
+ 
 * startTime ~ endTime
 * startOffset ~ endOffset
 * limit logCount
@@ -44,4 +45,29 @@ $ ./kafkaReader -b=${broker_servers} \
                 -decrypted=${payload_decrypt, aes128} \
                 -decryptkey=${payload_decrypt_key, default:nvmail} \
                 -config=${conf_file_path} \
+
+// sample 설정 파일은 아래와 같다.
+$ cat conf/sample.json
+{
+  "BrokerServers": [
+    "dev-tuyy0-cassandra001-ncl.nfra.io:9092"
+  ],
+  "Topic": "mytest1",
+  "Partition": -1,
+  "Key": "",
+  "Headers": {},
+  "UserName": "",
+  "Password": "",
+  "StartOffset": 0,
+  "EndOffset": 2147483647,
+  "Limit": 2147483647,
+  "PollTimeout": 10,
+  "StartTime": "1991-02-01T00:00:00Z",
+  "EndTime": "2041-02-01T00:00:00Z",
+  "FilterText": "",
+  "Output": "result.log",
+  "IsOnlyMsg": true,
+  "IsDecrypted": false,
+  "DecryptKey": ""
+}
 ```
