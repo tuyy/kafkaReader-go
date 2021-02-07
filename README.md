@@ -31,6 +31,7 @@ $ ./kafkaReader -b=${broker_servers} \
                 -grep=${included_text} \
                 -polltimeout=${poll_timeout_sec} \
                 -key=${kafka_key} \
-                -headers=${kafka_header_json}
-                -onlymsg=${true_or_false}
+                -headers=${kafka_header_json} \
+                -onlymsg=${true_or_false} \
+                -config=${conf_file_path}
 ```
