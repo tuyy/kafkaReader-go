@@ -118,7 +118,7 @@ $ head -n5 result.log
 [2021-02-06 19:57:35.562] [2021-02-03 14:21:57.137] CALLER=TEST CALLER_IP=10.114.148.21 NUM=8 host=cmiddev02.nm
 [2021-02-06 19:57:35.562] [2021-02-03 14:21:57.137] CALLER=TEST CALLER_IP=10.114.148.21 NUM=10 host=cmiddev02.nm
 
-# history 설정 
+# history  
 $ cat history/input_747198651_2021-02-09_233627.json
 {
     "BrokerServers": [
