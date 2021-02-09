@@ -41,7 +41,7 @@ $ ./kafkaReader -b=${broker_servers} \
 ```
 
 ```
-// sample 설정 파일은 아래와 같다.
+# sample 설정 파일
 $ cat conf/sample.json
 {
   "BrokerServers": [
@@ -51,8 +51,8 @@ $ cat conf/sample.json
   "Partition": -1,
   "Key": "",
   "Headers": {},
-  "UserName": "",
-  "Password": "",
+  "UserName": "",  // kafka sasl plain username 
+  "Password": "",   // kafka sasl plain password
   "StartOffset": 0,
   "EndOffset": 2147483647,
   "Limit": 2147483647,
@@ -66,16 +66,19 @@ $ cat conf/sample.json
   "DecryptKey": ""
 }
 
-# 실행 
+
 $ ls ${HOME_PATH}
 cmd  dist  go.mod  go.sum  Makefile  pkg  README.md
-$ make build;cd dist
-$ ls
+
+# build
+$ make build;cd dist; ls
 conf  kafkaReader  kafkaReaderForCentos
+
+# run
 $ ./kafkaReaderForCentos --config=conf/sample.json
 
 ==================== BEGIN ====================
-:: Broker Servers: [dev-test-kafka001.xfra.io:9092]
+:: Broker Servers: [dev-tuyy0-cassandra001-ncl.nfra.io:9092]
 :: Topic: mytest1
 :: Partition: -1
 :: Msg StartTime: 1991/02/01 00:00:00
@@ -103,4 +106,33 @@ Waiting.......
 :: Output: result.log
 :: Elapsed:10.066 sec
 =================================================
+
+# 작업 완료 후 결과 확인
+$ ls
+conf  history  kafkaReader  kafkaReaderForCentos  result.log
+
+$ head -n5 result.log
+[2021-02-06 19:57:35.562] [2021-02-03 14:21:57.137] CALLER=TEST CALLER_IP=10.114.148.21 NUM=2 host=cmiddev02.nm
+[2021-02-06 19:57:35.562] [2021-02-03 14:21:57.137] CALLER=TEST CALLER_IP=10.114.148.21 NUM=4 host=cmiddev02.nm
+[2021-02-06 19:57:35.562] [2021-02-03 14:21:57.137] CALLER=TEST CALLER_IP=10.114.148.21 NUM=6 host=cmiddev02.nm
+[2021-02-06 19:57:35.562] [2021-02-03 14:21:57.137] CALLER=TEST CALLER_IP=10.114.148.21 NUM=8 host=cmiddev02.nm
+[2021-02-06 19:57:35.562] [2021-02-03 14:21:57.137] CALLER=TEST CALLER_IP=10.114.148.21 NUM=10 host=cmiddev02.nm
+
+# history 설정 
+$ cat history/input_747198651_2021-02-09_233627.json
+{
+    "BrokerServers": [
+        "dev-tuyy0-cassandra001-ncl.nfra.io:9092"
+    ],
+    "Topic": "mytest1",
+    "Partition": -1,
+    "EndOffset": 2147483647,
+    "Limit": 2147483647,
+    "PollTimeout": 10,
+    "StartTime": "1991-02-01T00:00:00Z",
+    "EndTime": "2041-02-01T00:00:00Z",
+    "Output": "result.log",
+    "IsOnlyMsg": true,
+    "DecryptKey": "nvmail"
+}
 ```
