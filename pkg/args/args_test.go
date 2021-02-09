@@ -16,7 +16,8 @@ func TestConfigFileJson(t *testing.T) {
 }
 
 func TestReadConfigFile(t *testing.T) {
-	result, err := readConfigFile("/Users/yy/tuyy/go/src/github.com/tuyy/kafkaReader-go/conf/sample.json")
+	// TODO 파일 위치 기준으로 상대경로로 지정
+	result, err := readConfigFile("/Users/yy/tuyy/go/src/github.com/tuyy/kafkaReader-go/dist/conf/sample.json")
 	if err != nil {
 		t.Fatalf("failed to read conf file. err:%s\n", err)
 	}
