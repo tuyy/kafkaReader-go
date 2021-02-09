@@ -2,7 +2,7 @@
  go v1.15.3
 
 ### kafkaReader-go
- kafka에 저장되어 있는 특정 토픽의 로그를 아래 조건에 맞게 읽은 후 파일에 저장한다.
+ kafka에 저장되어 있는 특정 토픽의 로그를 아래 조건에 맞게 읽은 후 파일에 저장한다. (복호화 제공 및 history 정보 저장)
  
 * startTime ~ endTime
 * startOffset ~ endOffset
@@ -10,13 +10,6 @@
 * filter text
 * kafka key
 * kafka headers
-
-#### 로그 형식 예시
-```
-[2021-02-03 14:21:57.137] CALLER="TEST" CALLER_IP="10.114.148.21"
-[2021-02-03 14:22:17.268] CALLER="TEST" CALLER_IP="10.114.128.22"
-[2021-02-03 14:23:57.167] CALLER="TEST" CALLER_IP="10.114.128.22"
-```
 
 #### usage
 * config 파일의 우선순위가 커멘드 라인으로 입력한 값보다 높다. (overwrite)
@@ -45,7 +38,9 @@ $ ./kafkaReader -b=${broker_servers} \
                 -decrypted=${payload_decrypt, aes128} \
                 -decryptkey=${payload_decrypt_key, default:nvmail} \
                 -config=${conf_file_path} \
+```
 
+```
 // sample 설정 파일은 아래와 같다.
 $ cat conf/sample.json
 {
@@ -70,4 +65,42 @@ $ cat conf/sample.json
   "IsDecrypted": false,
   "DecryptKey": ""
 }
+
+# 실행 
+$ ls ${HOME_PATH}
+cmd  dist  go.mod  go.sum  Makefile  pkg  README.md
+$ make build;cd dist
+$ ls
+conf  kafkaReader  kafkaReaderForCentos
+$ ./kafkaReaderForCentos --config=conf/sample.json
+
+==================== BEGIN ====================
+:: Broker Servers: [dev-test-kafka001.xfra.io:9092]
+:: Topic: mytest1
+:: Partition: -1
+:: Msg StartTime: 1991/02/01 00:00:00
+:: Msg EndTime: 2041/02/01 00:00:00
+:: StartOffset: 0
+:: EndOffset: 2147483647
+:: Filtered Text:
+:: Kafka Key:
+:: Kafka Header: map[]
+:: Filtered Limit: 2147483647
+:: Kafka Poll Timeout: 10 sec
+:: Payload Decrypted: false
+:: Is Only msg: true
+=================================================
+
+Waiting.......
+
+=> Stopped Kafka Consumer. because context deadline exceeded.
+
+
+==================== SUMMARY ====================
+:: Total: 1950
+:: Filtered: 1950
+:: Topic: mytest1
+:: Output: result.log
+:: Elapsed:10.066 sec
+=================================================
 ```
