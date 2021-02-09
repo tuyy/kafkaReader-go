@@ -62,6 +62,7 @@ func readKafkaAndFilterMsg() (int, int) {
 			}
 		}
 	}
+
 	tick.Stop()
 	return totalReadCount, filteredCount
 }
