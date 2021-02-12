@@ -12,7 +12,7 @@ type Consumer struct {
 	reader *kafka.Reader
 }
 
-func NewKafkaConsumer(brokers []string, topic, userName, password string) *Consumer {
+func NewConsumer(brokers []string, topic, userName, password string) *Consumer {
 	dialer := &kafka.Dialer{
 		Timeout:   10 * time.Second,
 		DualStack: true,

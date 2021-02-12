@@ -98,7 +98,7 @@ func startWaitingTick() *time.Ticker {
 }
 
 func runReadingKafkaMsg(ctx context.Context, msgChan chan kafka.Msg) {
-	c := kafka.NewKafkaConsumer(args.Args.BrokerServers, args.Args.Topic, args.Args.UserName, args.Args.Password)
+	c := kafka.NewConsumer(args.Args.BrokerServers, args.Args.Topic, args.Args.UserName, args.Args.Password)
 
 	c.ReadMessages(ctx, msgChan, args.Args.PollTimeout)
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func TestKafkaConsumerHappy(t *testing.T) {
-	consumer := NewKafkaConsumer([]string{"dev-tuyy0-cassandra001-ncl.nfra.io:9092"},
+	consumer := NewConsumer([]string{"dev-tuyy0-cassandra001-ncl.nfra.io:9092"},
 		"mytest1",
 		"",
 		"")
