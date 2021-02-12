@@ -28,6 +28,7 @@ func main() {
 
 func readKafkaAndFilterMsg() (int, int) {
 	openOutputFile()
+	defer output.Close()
 
 	msgChan := make(chan kafka.Msg)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -70,10 +71,14 @@ func readKafkaAndFilterMsg() (int, int) {
 var output *os.File
 
 func openOutputFile() {
-	var err error
-	output, err = os.OpenFile(args.Args.Output, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatalf("failed to open result file. output:%s err:%s\n", args.Args.Output, err)
+	if args.Args.UseStdout {
+		output = os.Stdout
+	} else {
+		var err error
+		output, err = os.OpenFile(args.Args.Output, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatalf("failed to open result file. output:%s err:%s\n", args.Args.Output, err)
+		}
 	}
 }
 
@@ -81,8 +86,12 @@ func startWaitingTick() *time.Ticker {
 	tick := time.NewTicker(time.Second * 2)
 	go func() {
 		fmt.Print("Waiting..")
+
 		for _ = range tick.C {
-			fmt.Print(".")
+			// stdout 출력을 설정한 경우, '.'을 표시하지 않는다.
+			if !args.Args.UseStdout {
+				fmt.Print(".")
+			}
 		}
 	}()
 	return tick

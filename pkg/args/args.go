@@ -34,6 +34,7 @@ type KafkaReaderArgs struct {
 	IsOnlyMsg     bool              `json:",omitempty"`
 	IsDecrypted   bool              `json:",omitempty"`
 	DecryptKey    string            `json:",omitempty"`
+	UseStdout     bool              `json:",omitempty"`
 }
 
 var Args KafkaReaderArgs
@@ -48,6 +49,7 @@ func LoadAndValidateArgs() {
 	flag.StringVar(&Args.DecryptKey, "decryptkey", "nvmail", "aes128 decrypt key")
 	flag.BoolVar(&Args.IsOnlyMsg, "onlymsg", false, "include only msg")
 	flag.BoolVar(&Args.IsDecrypted, "decrypted", false, "payload aes128 decrypted with decrypt key")
+	flag.BoolVar(&Args.UseStdout, "usestdout", false, "output is stdout")
 	flag.IntVar(&Args.Partition, "partition", -1, "partition")
 	flag.IntVar(&Args.Limit, "limit", math.MaxInt32, "max filtered msg limit")
 	flag.IntVar(&Args.PollTimeout, "polltimeout", 60, "kafka msg poll timeout")
@@ -150,6 +152,9 @@ func loadConfigFile(configFileStr string) {
 	}
 	if newConf.DecryptKey != "" && newConf.DecryptKey != Args.DecryptKey {
 		Args.DecryptKey = newConf.DecryptKey
+	}
+	if newConf.UseStdout != Args.UseStdout {
+		Args.UseStdout = newConf.UseStdout
 	}
 }
 
