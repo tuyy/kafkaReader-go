@@ -108,7 +108,7 @@ func WriteFilteredMsg(msg *kafka.Msg, payload string) {
 		fmt.Fprintln(output, payload)
 	} else {
 		fmt.Fprintf(output, "time:%s topic:%s partition:%d offset:%d key:%s headers:%v msg:%s\n",
-			msg.Time.Format(basicTimeLayout),
+			msg.Time.In(time.Local).Format(basicTimeLayout),
 			msg.Topic,
 			msg.Partition,
 			msg.Offset,
