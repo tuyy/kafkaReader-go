@@ -38,15 +38,12 @@ func readKafkaAndFilterMsg() (int, int) {
 	totalReadCount, filteredCount := 0, 0
 	for msg := range msgChan {
 		totalReadCount++
-
-		if totalReadCount%30000 == 0 {
-			fmt.Printf("[%s] TotalReadCount:%d FilteredCount:%d CurrentMsgTime:%s EndMsgTime:%s IsAfter:%v\n",
+		if totalReadCount%10000 == 0 {
+			fmt.Printf("[%s] TotalReadCount:%d FilteredCount:%d CurrentMsgTime:%s\n",
 				time.Now().Local().Format(basicTimeLayout),
 				totalReadCount,
 				filteredCount,
-				msg.Time.Format(basicTimeLayout),
-				args.Args.EndTime.Format(basicTimeLayout),
-				msg.Time.After(args.Args.EndTime))
+				msg.Time.Format(basicTimeLayout))
 		}
 
 		var payload string
