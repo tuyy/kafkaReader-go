@@ -26,6 +26,7 @@ func main() {
 	printSummaryBanner(totalReadCount, filteredCount, time.Since(start))
 }
 
+// TODO 함수가 너무 길다.. 줄여야한다.
 func readKafkaAndFilterMsg() (int, int) {
 	openOutputFile()
 	defer output.Close()
@@ -34,12 +35,16 @@ func readKafkaAndFilterMsg() (int, int) {
 	ctx, cancel := context.WithCancel(context.Background())
 	runReadingKafkaMsg(ctx, msgChan)
 
-	// print "Waiting..."
-	tick := startWaitingTick()
-
 	totalReadCount, filteredCount := 0, 0
 	for msg := range msgChan {
 		totalReadCount++
+
+		if totalReadCount%100000 == 0 {
+			fmt.Printf("TotalReadCount:%d FilteredCount:%d CurrentMsgTime:%s\n",
+				totalReadCount,
+				filteredCount,
+				msg.Time.Format(basicTimeLayout))
+		}
 
 		var payload string
 		if args.Args.IsDecrypted {
@@ -53,6 +58,11 @@ func readKafkaAndFilterMsg() (int, int) {
 			payload = strings.TrimSpace(string(msg.Value))
 		}
 
+		if msg.Time.After(args.Args.EndTime) {
+			cancel()
+			break
+		}
+
 		if isFiltered(&msg, payload) {
 			WriteFilteredMsg(&msg, payload)
 
@@ -64,7 +74,6 @@ func readKafkaAndFilterMsg() (int, int) {
 		}
 	}
 
-	tick.Stop()
 	return totalReadCount, filteredCount
 }
 
@@ -80,21 +89,6 @@ func openOutputFile() {
 			log.Fatalf("failed to open result file. output:%s err:%s\n", args.Args.Output, err)
 		}
 	}
-}
-
-func startWaitingTick() *time.Ticker {
-	tick := time.NewTicker(time.Second * 2)
-	go func() {
-		fmt.Print("Waiting..")
-
-		for _ = range tick.C {
-			// stdout 출력을 설정한 경우, '.'을 표시하지 않는다.
-			if !args.Args.UseStdout {
-				fmt.Print(".")
-			}
-		}
-	}()
-	return tick
 }
 
 func runReadingKafkaMsg(ctx context.Context, msgChan chan kafka.Msg) {
