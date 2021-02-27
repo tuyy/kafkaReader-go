@@ -14,7 +14,7 @@
 #### usage
 * config 파일의 우선순위가 커멘드 라인으로 입력한 값보다 높다. (overwrite)
 * broker_server, topic 옵션은 필수고 나머지는 기본 값을 사용할 수 있다.
-* 종료 조건은, filtered_msg_limit_count, poll_timeout_sec 이다.
+* 종료 조건은, filtered_msg_limit_count, poll_timeout_sec, end_time 이다.
 * 옵션 기본 값은 아래 링크를 참조한다.
     * [default option value](https://github.com/tuyy/kafkaReader-go/blob/master/pkg/cmd/args.go#L40-L56)
  
@@ -93,8 +93,6 @@ $ ./kafkaReaderForCentos --config=conf/sample.json
 :: Payload Decrypted: false
 :: Is Only msg: true
 =================================================
-
-Waiting.......
 
 => Stopped Kafka Consumer. because context deadline exceeded.
 
