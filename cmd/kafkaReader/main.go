@@ -59,7 +59,7 @@ func readKafkaAndFilterMsg() (int, int) {
 			payload = strings.TrimSpace(string(msg.Value))
 		}
 
-		if args.Args.EndTime.After(msg.Time) {
+		if msg.Time.After(args.Args.EndTime) {
 			cancel()
 			break
 		}
