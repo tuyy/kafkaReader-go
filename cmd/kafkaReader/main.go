@@ -40,11 +40,13 @@ func readKafkaAndFilterMsg() (int, int) {
 		totalReadCount++
 
 		if totalReadCount%30000 == 0 {
-			fmt.Printf("[%s] TotalReadCount:%d FilteredCount:%d CurrentMsgTime:%s\n",
+			fmt.Printf("[%s] TotalReadCount:%d FilteredCount:%d CurrentMsgTime:%s EndMsgTime:%s IsAfter:%v\n",
 				time.Now().Local().Format(basicTimeLayout),
 				totalReadCount,
 				filteredCount,
-				msg.Time.Format(basicTimeLayout))
+				msg.Time.Format(basicTimeLayout),
+				args.Args.EndTime.Format(basicTimeLayout),
+				msg.Time.After(args.Args.EndTime))
 		}
 
 		var payload string
@@ -53,7 +55,6 @@ func readKafkaAndFilterMsg() (int, int) {
 			if err != nil {
 				fmt.Printf("failed to decrypt payload. err:%s payload:%s\n", err, payload)
 			}
-
 			payload = strings.TrimSpace(decrypted)
 		} else {
 			payload = strings.TrimSpace(string(msg.Value))
