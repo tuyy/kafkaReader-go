@@ -12,7 +12,7 @@ type Consumer struct {
 	reader *kafka.Reader
 }
 
-func NewConsumer(brokers []string, topic, userName, password string) *Consumer {
+func NewConsumer(brokers []string, topic, userName, password string, partition int, startOffset int64) *Consumer {
 	dialer := &kafka.Dialer{
 		Timeout:   10 * time.Second,
 		DualStack: true,
@@ -24,14 +24,16 @@ func NewConsumer(brokers []string, topic, userName, password string) *Consumer {
 		}
 	}
 
-	return &Consumer{
-		reader: kafka.NewReader(kafka.ReaderConfig{
-			Brokers:        brokers,
-			Topic:          topic,
-			SessionTimeout: time.Second * 10,
-			Dialer:         dialer,
-		}),
-	}
+	reader := kafka.NewReader(kafka.ReaderConfig{
+		Brokers:        brokers,
+		Topic:          topic,
+		SessionTimeout: time.Second * 10,
+		Dialer:         dialer,
+		Partition:      partition,
+	})
+	reader.SetOffset(startOffset)
+
+	return &Consumer{reader: reader}
 }
 
 type Msg struct {

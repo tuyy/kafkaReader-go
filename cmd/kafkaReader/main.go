@@ -14,10 +14,12 @@ import (
 
 const basicTimeLayout = "2006/01/02 15:04:05.999"
 
+func init() {
+	args.LoadAndValidateArgs()
+}
+
 func main() {
 	start := time.Now()
-
-	args.LoadAndValidateArgs()
 
 	printBeginBanner()
 
@@ -91,7 +93,12 @@ func openOutputFile() {
 }
 
 func runReadingKafkaMsg(ctx context.Context, msgChan chan kafka.Msg) {
-	c := kafka.NewConsumer(args.Args.BrokerServers, args.Args.Topic, args.Args.UserName, args.Args.Password)
+	c := kafka.NewConsumer(args.Args.BrokerServers,
+		args.Args.Topic,
+		args.Args.UserName,
+		args.Args.Password,
+		args.Args.Partition,
+		args.Args.StartOffset)
 
 	c.ReadMessages(ctx, msgChan, args.Args.PollTimeout)
 }
@@ -100,13 +107,22 @@ func WriteFilteredMsg(msg *kafka.Msg, payload string) {
 	if args.Args.IsOnlyMsg {
 		fmt.Fprintln(output, payload)
 	} else {
-		fmt.Fprintf(output, "time:%s topic:%s partition:%d offset:%d key:%s headers:%v msg:%s\n",
+		headersStr := "["
+		for i, h := range msg.Headers {
+			headersStr += fmt.Sprintf("%s: %s", h.Key, h.Value)
+			if i != len(msg.Headers)-1 {
+				headersStr += ", "
+			}
+		}
+		headersStr += "]"
+
+		fmt.Fprintf(output, "time:%s topic:%s partition:%d offset:%d key:%s headers:%s msg:%s\n",
 			msg.Time.In(time.Local).Format(basicTimeLayout),
 			msg.Topic,
 			msg.Partition,
 			msg.Offset,
 			msg.Key,
-			msg.Headers,
+			headersStr,
 			payload)
 	}
 }

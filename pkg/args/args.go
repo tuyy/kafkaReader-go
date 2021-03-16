@@ -50,7 +50,7 @@ func LoadAndValidateArgs() {
 	flag.BoolVar(&Args.IsOnlyMsg, "onlymsg", false, "include only msg")
 	flag.BoolVar(&Args.IsDecrypted, "decrypted", false, "payload aes128 decrypted with decrypt key")
 	flag.BoolVar(&Args.UseStdout, "usestdout", false, "output is stdout")
-	flag.IntVar(&Args.Partition, "partition", -1, "partition")
+	flag.IntVar(&Args.Partition, "partition", 0, "partition")
 	flag.IntVar(&Args.Limit, "limit", math.MaxInt32, "max filtered msg limit")
 	flag.IntVar(&Args.PollTimeout, "polltimeout", 60, "kafka msg poll timeout")
 	flag.Int64Var(&Args.StartOffset, "startoffset", 0, "start offset")
@@ -122,6 +122,15 @@ func loadConfigFile(configFileStr string) {
 	}
 	if newConf.PollTimeout != Args.PollTimeout {
 		Args.PollTimeout = newConf.PollTimeout
+	}
+	if newConf.Partition != Args.Partition {
+		Args.Partition = newConf.Partition
+	}
+	if newConf.StartOffset != Args.StartOffset {
+		Args.StartOffset = newConf.StartOffset
+	}
+	if newConf.EndOffset != Args.EndOffset {
+		Args.EndOffset = newConf.EndOffset
 	}
 	if newConf.FilterText != "" && newConf.FilterText != Args.FilterText {
 		Args.FilterText = newConf.FilterText

@@ -11,7 +11,9 @@ func TestKafkaConsumerHappy(t *testing.T) {
 	consumer := NewConsumer([]string{"dev-tuyy0-cassandra001-ncl.nfra.io:9092"},
 		"mytest1",
 		"",
-		"")
+		"",
+		0,
+		0)
 
 	msgChan := make(chan Msg)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)

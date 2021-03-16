@@ -3,3 +3,4 @@ go.sum
 history/
 result.log
 dist/kafkaReader
+dist/conf/qa-kr-msgsearch.json
